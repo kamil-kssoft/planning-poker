@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./api
+    container_name: planning-poker-api
+    restart: always
+    ports:
+      - 7010:5000
+    environment:
+      FLASK_ENV: development
+
+  web:
+    build: ./front
+    container_name: planning-poker-web
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - 7011:80
+    environment:
+      - API_URL=http://localhost:7010
