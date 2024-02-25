@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const GameDetailView = ({ context, session, userName, unloadGame }) => {
+const GameDetailView = ({ context, session, userName, userType, unloadGame }) => {
   const [currentGame, setCurrentGame] = useState(new Set());
 
   const userTypes = ['DEV', 'Q&A', 'Scrum master'];
@@ -31,15 +31,39 @@ const GameDetailView = ({ context, session, userName, unloadGame }) => {
       const sum = scores.reduce((a, b) => a + b, 0);
       average = sum / scores.length;
     }
-    return <span style={{fontWeight:"bold"}}>Average: {average.toFixed(1)}</span>
+    if (average === 0) return;
+
+    return <span style={{ fontWeight: "bold" }}>(Average: {average.toFixed(1)})</span>
+  }
+
+  const displayTotalAverage = () => {
+    if (currentGame.hidden === true || !('scores' in currentGame))
+      return;
+
+    let average = 0;
+    let counter = 0;
+    if (Object.keys(currentGame.scores).length > 0) {
+      for (const userType in currentGame.scores) {
+        const scores = Object.values(currentGame.scores[userType]);
+        const sum = scores.reduce((a, b) => a + b, 0);
+        average += sum;
+        counter += scores.length;
+      }
+    }
+    if (counter === 0) return;
+
+    average = average / counter;
+    if (average === 0) return;
+
+    return <span style={{ fontWeight: "bold" }}>(Total average: {average.toFixed(1)})</span>
   }
 
   const isUserVoted = (userName, userType) =>
     allowedUserTypesToVote.indexOf(userType) > -1
-      && currentGame
-      && currentGame.scores
-      && userType in currentGame.scores
-      && userName in currentGame.scores[userType];
+    && currentGame
+    && currentGame.scores
+    && userType in currentGame.scores
+    && userName in currentGame.scores[userType];
 
   const displayScore = (userName, userType) => {
     const isValid = currentGame && currentGame.scores
@@ -53,14 +77,52 @@ const GameDetailView = ({ context, session, userName, unloadGame }) => {
     </span>
   }
 
+  const displayVoteSingularOrPluralForm = (groupedVotes) => {
+    return groupedVotes.length > 1 ? `${groupedVotes.length} votes` : `1 vote`;
+  }
+
+  const displaySummary = (scores) => {
+    const userScoreDict = {};
+    for (const userType in scores) {
+      for (const userName in scores[userType]) {
+        userScoreDict[userName] = scores[userType][userName]
+      }
+    }
+
+    const groupedScores = {};
+    for (const userName in userScoreDict) {
+      const score = userScoreDict[userName];
+      if (!(score in groupedScores)) {
+        groupedScores[score] = [];
+      }
+      groupedScores[score].push(userName);
+    }
+
+    const orderedScores = Object.keys(groupedScores).sort((a, b) => b - a);
+
+    return (<div style={{marginTop: "20px"}}>
+      {orderedScores.map((score, index) => (
+        <div key={score}>
+          <div><span style={{fontWeight: "600"}}>{displayVoteSingularOrPluralForm(groupedScores[score])} for <span className="badge bg-danger">{score}</span>:</span>
+            {groupedScores[score].map((userName, userIndex) => (
+              <span key={userName}>
+                {userIndex > 0 ? ',' : ''} {userName}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>)
+  }
+
   return (currentGame && <div>
     <h4>Active game: {currentGame.name}</h4>
-    <h6>Players</h6>
+    <h6>Players {displayTotalAverage()}</h6>
     <div>
       {
         userTypes.map(userType => {
           return (<div key={userType}>
-            <h6 style={{ marginTop: "20px" }}>{userType}</h6>
+            <h6 style={{ marginTop: "20px" }}>{userType} {displayAverage(userType)}</h6>
             {session && session.users && Object.entries(session.users)
               .sort((a, b) => a[0] - b[0])
               .filter(([_, type]) => type === userType)
@@ -73,7 +135,6 @@ const GameDetailView = ({ context, session, userName, unloadGame }) => {
                 </div>)
               }
               )}
-            {displayAverage(userType)}
           </div>)
 
         })
@@ -89,10 +150,11 @@ const GameDetailView = ({ context, session, userName, unloadGame }) => {
         }
       </div>
     }
-    <div style={{ marginTop: "20px" }}>
+    {currentGame.hidden === false && displaySummary(currentGame.scores)}
+    {userType == "Scrum master" && <div style={{ marginTop: "20px" }}>
       <button className="btn btn-success" onClick={revealScores} style={{ marginRight: "10px" }}>Reveal scores</button>
       <button className="btn btn-warning" onClick={unloadGame}>Create new game</button>
-    </div>
+    </div>}
   </div>);
 
 };
