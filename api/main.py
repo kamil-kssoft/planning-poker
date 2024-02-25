@@ -25,7 +25,7 @@ def handle_value_error(error):
 
 @app.route(f"/ping", methods=["GET"])
 def get() -> dict:
-    return jsonify("pong"), 200
+    return "pong", 200
 
 
 @app.route(f"{CONTROLLER}", methods=["POST"])

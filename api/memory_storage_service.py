@@ -5,6 +5,8 @@ from uuid import uuid4
 
 class MemoryStorageService:
 
+    allowed_user_types = ['DEV', 'Q&A', 'Scrum master', 'Viewers']
+
     def __init__(self):
         self._storage = {}
 
@@ -37,6 +39,8 @@ class MemoryStorageService:
 
     def add_player(self, session_id: str, user_name: str, user_type: str):
         self._assert_session_exists(session_id)
+        if user_type not in self.allowed_user_types:
+            raise ValueError(f"User type {user_type} is not allowed")
         if user_name in self._storage[session_id]["users"]:
             return
         self._storage[session_id]["users"][user_name] = user_type

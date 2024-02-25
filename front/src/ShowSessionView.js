@@ -64,7 +64,8 @@ const ShowSessionView = ({ context, sessionId }) => {
         context={context}
         session={session}
         setSession={setSession}
-        userName={userData.name} />}
+        userName={userData.name}
+        userType={userData.type}/>}
     </div>
   )
 };

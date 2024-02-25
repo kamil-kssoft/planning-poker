@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AddGameView from "./AddGameView";
 import GameDetailView from "./GameDetailView";
 
-const GameView = ({context, session, userName}) => {
+const GameView = ({context, session, userName, userType}) => {
   const [gameLoaded, setGameLoaded] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,7 @@ const GameView = ({context, session, userName}) => {
         context={context}
         session={session}
         userName={userName}
+        userType={userType}
         unloadGame={unloadGame}/>}
     </div>
   );

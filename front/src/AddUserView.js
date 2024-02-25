@@ -2,9 +2,9 @@ import { useState } from "react";
 
 const AddUserView = ({ onAddUser }) => {
   const [userName, setUserName] = useState('');
-  const [userType, setUserType] = useState('DEV' || 'Q&A' || 'Scrum master');
+  const [userType, setUserType] = useState('DEV' || 'Q&A' || 'Scrum master' || 'Viewers');
 
-  const options = ['DEV', 'Q&A', 'Scrum master'];
+  const options = ['DEV', 'Q&A', 'Scrum master', 'Viewers'];
 
   const handleAddUser = () => {
     onAddUser({ userName, userType });
